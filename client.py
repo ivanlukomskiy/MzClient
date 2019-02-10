@@ -19,7 +19,7 @@ HEADERS = {'Connection': 'close'}
 PATH = "{}/api/servo/y/velocity".format(API_URI)
 
 
-def convert_value(value):
+def position_to_percents(value):
     if LEFT_THRESHOLD < value < RIGHT_THRESHOLD:
         return 0
     if value < 0:
@@ -39,7 +39,7 @@ class MzClient:
             for event in events:
                 if event.code != INPUT_CODE:
                     continue
-                self.currentValue = convert_value(event.state)
+                self.currentValue = position_to_percents(event.state)
 
     def rest_client_loop(self):
         while 1:
@@ -52,7 +52,7 @@ class MzClient:
             r = self.http.request('PUT', PATH, body=encoded_data)
             val = json.loads(r.data.decode('utf-8'))['value']
             end = time.time()
-            print("Value updated: {0:.2f}, took {1:.2f} sec".format(val, (end - start)))
+            print("Velocity updated: {0:.2f}, took {1:.4f} sec".format(val, (end - start)))
 
     def startup(self):
         Thread(target=self.events_handling_loop).start()
