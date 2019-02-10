@@ -18,6 +18,8 @@ API_URI = 'http://localhost:8000'
 HEADERS = {'Connection': 'close'}
 PATH = "{}/api/servo/y/velocity".format(API_URI)
 
+http = urllib3.PoolManager()
+
 
 def position_to_percents(value):
     if LEFT_THRESHOLD < value < RIGHT_THRESHOLD:
@@ -30,8 +32,6 @@ def position_to_percents(value):
 class MzClient:
     currentValue = 0
     driverValue = 0
-    lastTimeSent = 0
-    http = urllib3.PoolManager()
 
     def events_handling_loop(self):
         while 1:
@@ -49,7 +49,7 @@ class MzClient:
             self.driverValue = self.currentValue
             encoded_data = json.dumps({"value": self.driverValue}).encode('utf-8')
             start = time.time()
-            r = self.http.request('PUT', PATH, body=encoded_data)
+            r = http.request('PUT', PATH, body=encoded_data)
             val = json.loads(r.data.decode('utf-8'))['value']
             end = time.time()
             print("Velocity updated: {0:.2f}, took {1:.4f} sec".format(val, (end - start)))
