@@ -18,16 +18,14 @@ INPUT_CODE = 'ABS_RX'
 CLIENT_MIN_DELAY = 0.01
 SERVER_IP = '192.168.88.249'
 SERVER_PORT = 5005
-LOWERING_COEFFICIENT = 0.3
-SHIFT = -1.5
 
 
 def position_to_percents(value):
     if LEFT_THRESHOLD < value < RIGHT_THRESHOLD:
-        return SHIFT
+        return 0
     if value < 0:
-        return - value * 100 * LOWERING_COEFFICIENT / LEFT_MAX + SHIFT
-    return value * 100 * LOWERING_COEFFICIENT / RIGHT_MAX + SHIFT
+        return - value * 100 / LEFT_MAX
+    return value * 100 / RIGHT_MAX
 
 
 class MzClient:
@@ -50,7 +48,7 @@ class MzClient:
                 continue
 
             self.driverValue = self.currentValue
-            self.sock.sendto(struct.pack('bf', 1, self.driverValue, current_millis()),
+            self.sock.sendto(struct.pack('bfq', 1, self.driverValue, current_millis()),
                              (SERVER_IP, SERVER_PORT))
             print("Set to {}".format(self.driverValue))
 
